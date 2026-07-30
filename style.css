@@ -1,0 +1,265 @@
+:root {
+  --paper: #F2F4EE;
+  --surface: #FFFFFF;
+  --ink: #1E2621;
+  --ink-soft: #5B655D;
+  --amber: #B8710A;
+  --amber-dark: #935A08;
+  --sage: #4F7A5B;
+  --brick: #A94A3D;
+  --line: #DCD9CC;
+  --radius: 10px;
+  --font-label: 'IBM Plex Mono', monospace;
+  --font-body: 'IBM Plex Sans', sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid var(--line);
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.eyebrow {
+  margin: 0;
+  font-family: var(--font-label);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.68rem;
+  color: var(--amber-dark);
+}
+
+.topbar__label h1 {
+  margin: 4px 0 0;
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+main {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 20px 20px 60px;
+}
+
+.dose-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.dose-card {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(30, 38, 33, 0.04);
+}
+
+.dose-card__tab {
+  width: 8px;
+  flex-shrink: 0;
+  background: var(--amber);
+}
+
+.dose-card--taken .dose-card__tab { background: var(--sage); }
+.dose-card--skipped .dose-card__tab { background: var(--brick); }
+.dose-card--taken, .dose-card--skipped { opacity: 0.75; }
+
+.dose-card__main {
+  flex: 1;
+  min-width: 0;
+}
+
+.dose-card__row {
+  padding: 14px 16px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dose-card__time {
+  margin: 0;
+  font-family: var(--font-label);
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.dose-card__name {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.dose-card__dose {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+}
+
+.dose-card__divider {
+  border: none;
+  border-top: 1px dashed var(--line);
+  margin: 0 16px;
+}
+
+.dose-card__actions {
+  display: flex;
+  gap: 8px;
+  padding: 10px 16px 14px;
+}
+
+.chip {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.82rem;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.chip--taken:hover { border-color: var(--sage); color: var(--sage); }
+.chip--skip:hover { border-color: var(--brick); color: var(--brick); }
+
+.chip--taken.is-active {
+  background: var(--sage);
+  border-color: var(--sage);
+  color: #fff;
+}
+
+.chip--skip.is-active {
+  background: var(--brick);
+  border-color: var(--brick);
+  color: #fff;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  padding: 40px 20px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+.btn {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.88rem;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 16px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.15s;
+}
+
+.btn--add, .btn--primary {
+  background: var(--amber);
+  color: #fff;
+}
+
+.btn--add:hover, .btn--primary:hover { opacity: 0.9; }
+
+.btn__plus {
+  font-family: var(--font-label);
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.btn--ghost {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink);
+}
+
+.btn:focus-visible, .chip:focus-visible, input:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(30, 38, 33, 0.42);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 10;
+}
+
+.modal-backdrop[hidden] { display: none; }
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: min(92vw, 380px);
+  box-shadow: 0 12px 32px rgba(30, 38, 33, 0.2);
+}
+
+.modal h2 {
+  margin: 0 0 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.field span {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+}
+
+.field input {
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+@media (min-width: 600px) {
+  .topbar, main { max-width: 560px; }
+}

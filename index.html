@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MedTime — Today's Doses</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="topbar__label">
+      <p class="eyebrow">Rx · Today's Schedule</p>
+      <h1 id="dateHeading">Loading date…</h1>
+    </div>
+    <button class="btn btn--add" id="openAddBtn" aria-haspopup="dialog">
+      <span class="btn__plus" aria-hidden="true">+</span> Add medicine
+    </button>
+  </header>
+
+  <main>
+    <section class="dose-list" id="doseList" aria-live="polite">
+      <!-- dose cards are injected here by script.js -->
+    </section>
+
+    <p class="empty-state" id="emptyState" hidden>
+      No medicines yet. Add your first one to start tracking today's doses.
+    </p>
+  </main>
+
+  <div class="modal-backdrop" id="modalBackdrop" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h2 id="modalTitle">New medicine</h2>
+      <form id="addForm" novalidate>
+        <label class="field">
+          <span>Name</span>
+          <input type="text" id="medName" placeholder="e.g. Amoxicillin" required>
+        </label>
+        <label class="field">
+          <span>Dosage</span>
+          <input type="text" id="medDose" placeholder="e.g. 500 mg" required>
+        </label>
+        <label class="field">
+          <span>Time</span>
+          <input type="time" id="medTime" required>
+        </label>
+        <div class="modal__actions">
+          <button type="button" class="btn btn--ghost" id="cancelAddBtn">Cancel</button>
+          <button type="submit" class="btn btn--primary">Save medicine</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
