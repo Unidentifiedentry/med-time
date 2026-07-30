@@ -3,58 +3,364 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MedTime — Today's Doses</title>
+<title>MediAlert — Smart Medicine Reminder</title>
+<meta name="description" content="MediAlert helps you remember to take your medicines on time, with voice reminders, health tips and a daily dashboard.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <header class="topbar">
-    <div class="topbar__label">
-      <p class="eyebrow">Rx · Today's Schedule</p>
-      <h1 id="dateHeading">Loading date…</h1>
-    </div>
-    <button class="btn btn--add" id="openAddBtn" aria-haspopup="dialog">
-      <span class="btn__plus" aria-hidden="true">+</span> Add medicine
-    </button>
-  </header>
+<!-- ============ LOADER ============ -->
+<div id="loader" class="loader" aria-hidden="true">
+  <div class="loader-pulse">
+    <svg viewBox="0 0 120 40" class="loader-ecg">
+      <polyline points="0,20 25,20 32,4 40,36 48,20 120,20" />
+    </svg>
+  </div>
+  <p>Waking up MediAlert…</p>
+</div>
 
-  <main>
-    <section class="dose-list" id="doseList" aria-live="polite">
-      <!-- dose cards are injected here by script.js -->
-    </section>
+<!-- ============ NAV ============ -->
+<header class="nav" role="banner">
+  <div class="nav-inner">
+    <a href="#top" class="brand" aria-label="MediAlert home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" width="34" height="34">
+          <rect x="4" y="16" width="32" height="8" rx="4" fill="var(--blue-600)"/>
+          <rect x="4" y="16" width="14" height="8" rx="4" fill="var(--green-500)"/>
+          <circle cx="4" cy="20" r="4" fill="var(--green-500)"/>
+          <circle cx="36" cy="20" r="4" fill="var(--blue-600)"/>
+        </svg>
+      </span>
+      <span class="brand-word">Medi<em>Alert</em></span>
+    </a>
 
-    <p class="empty-state" id="emptyState" hidden>
-      No medicines yet. Add your first one to start tracking today's doses.
-    </p>
-  </main>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#dashboard">Dashboard</a>
+      <a href="#medicines">Medicines</a>
+      <a href="#history">History</a>
+      <a href="#wellbeing">Wellbeing</a>
+      <a href="#emergency">Emergency</a>
+    </nav>
 
-  <div class="modal-backdrop" id="modalBackdrop" hidden>
-    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-      <h2 id="modalTitle">New medicine</h2>
-      <form id="addForm" novalidate>
-        <label class="field">
-          <span>Name</span>
-          <input type="text" id="medName" placeholder="e.g. Amoxicillin" required>
-        </label>
-        <label class="field">
-          <span>Dosage</span>
-          <input type="text" id="medDose" placeholder="e.g. 500 mg" required>
-        </label>
-        <label class="field">
-          <span>Time</span>
-          <input type="time" id="medTime" required>
-        </label>
-        <div class="modal__actions">
-          <button type="button" class="btn btn--ghost" id="cancelAddBtn">Cancel</button>
-          <button type="submit" class="btn btn--primary">Save medicine</button>
-        </div>
-      </form>
+    <div class="nav-actions">
+      <button id="a11yToggleBtn" class="icon-btn" aria-haspopup="dialog" aria-controls="a11yPanel" title="Accessibility settings">
+        <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 8v8M8 11h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </button>
+      <button id="themeToggleBtn" class="icon-btn" title="Toggle dark mode" aria-pressed="false">
+        <svg id="themeIcon" viewBox="0 0 24 24" width="20" height="20"><path d="M21 12.3A9 9 0 1 1 11.7 3a7 7 0 0 0 9.3 9.3Z" fill="currentColor"/></svg>
+      </button>
     </div>
   </div>
+</header>
 
-  <script src="script.js"></script>
+<!-- ============ A11Y PANEL ============ -->
+<div id="a11yPanel" class="drawer" role="dialog" aria-modal="true" aria-labelledby="a11yTitle" hidden>
+  <div class="drawer-card">
+    <div class="drawer-head">
+      <h2 id="a11yTitle">Comfort &amp; accessibility</h2>
+      <button class="icon-btn" id="closeA11y" aria-label="Close">✕</button>
+    </div>
+    <label class="switch-row">
+      <span>Large text</span>
+      <input type="checkbox" id="largeFontToggle">
+      <span class="switch"></span>
+    </label>
+    <label class="switch-row">
+      <span>High contrast</span>
+      <input type="checkbox" id="highContrastToggle">
+      <span class="switch"></span>
+    </label>
+    <label class="switch-row">
+      <span>Speak reminders aloud</span>
+      <input type="checkbox" id="voiceToggle" checked>
+      <span class="switch"></span>
+    </label>
+    <p class="drawer-hint">These preferences save automatically on this device.</p>
+  </div>
+</div>
+
+<main id="top">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" aria-label="Welcome">
+    <svg class="hero-ecg" viewBox="0 0 1000 160" preserveAspectRatio="none" aria-hidden="true">
+      <polyline id="ecgLine" points="0,80 120,80 150,20 180,140 210,80 380,80 410,40 430,120 450,80 1000,80" />
+    </svg>
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <span class="eyebrow">Team Bit4Bit presents</span>
+        <h1>Never miss a dose. <em>Never miss a moment.</em></h1>
+        <p>MediAlert keeps a gentle, steady watch over your medicine schedule — with clear reminders, a calm voice, and a dashboard that shows exactly how you're doing today.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" id="heroAddBtn">＋ Add your first medicine</button>
+          <a href="#dashboard" class="btn btn-ghost">See today's plan</a>
+        </div>
+        <p class="hero-clock" id="liveClock" aria-live="off">--:--:--</p>
+      </div>
+
+      <div class="hero-card glass" aria-live="polite">
+        <span class="hero-card-label">Next up</span>
+        <div id="nextDoseCard">
+          <p class="hero-card-empty">No reminders queued yet — add a medicine to get started.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DASHBOARD ============ -->
+  <section id="dashboard" class="section">
+    <div class="section-head">
+      <h2>Today at a glance</h2>
+      <p>Your dashboard updates the moment you log a dose.</p>
+    </div>
+
+    <div class="stat-grid" id="statGrid">
+      <article class="stat-card">
+        <span class="stat-icon">💊</span>
+        <span class="stat-value" id="statTotal">0</span>
+        <span class="stat-label">Total medicines</span>
+      </article>
+      <article class="stat-card">
+        <span class="stat-icon">⏰</span>
+        <span class="stat-value" id="statToday">0</span>
+        <span class="stat-label">Reminders today</span>
+      </article>
+      <article class="stat-card stat-good">
+        <span class="stat-icon">✅</span>
+        <span class="stat-value" id="statTaken">0</span>
+        <span class="stat-label">Taken today</span>
+      </article>
+      <article class="stat-card stat-warn">
+        <span class="stat-icon">⚠️</span>
+        <span class="stat-value" id="statMissed">0</span>
+        <span class="stat-label">Missed today</span>
+      </article>
+      <article class="stat-card stat-streak">
+        <span class="stat-icon">🔥</span>
+        <span class="stat-value" id="statStreak">0</span>
+        <span class="stat-label">Day streak</span>
+      </article>
+    </div>
+
+    <div class="progress-wrap" aria-label="Today's progress">
+      <div class="progress-labels">
+        <span>Today's progress</span>
+        <span id="progressPct">0%</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    </div>
+
+    <blockquote class="quote" id="dailyQuote">"Small doses of consistency build a lifetime of health."</blockquote>
+  </section>
+
+  <!-- ============ MEDICINES ============ -->
+  <section id="medicines" class="section">
+    <div class="section-head">
+      <h2>Your medicines</h2>
+      <p>Add a medicine once — MediAlert takes care of the rest.</p>
+    </div>
+
+    <div class="med-layout">
+      <form id="medForm" class="card form-card" aria-label="Add or edit a medicine">
+        <h3 id="formTitle">Add a medicine</h3>
+        <input type="hidden" id="medId">
+
+        <label class="field">
+          <span>Medicine name</span>
+          <input type="text" id="medName" placeholder="e.g. Paracetamol" required>
+        </label>
+
+        <div class="field-row">
+          <label class="field">
+            <span>Dosage</span>
+            <input type="text" id="medDosage" placeholder="e.g. 500mg, 1 tablet" required>
+          </label>
+          <label class="field">
+            <span>Time</span>
+            <input type="time" id="medTime" required>
+          </label>
+        </div>
+
+        <div class="field-row">
+          <label class="field">
+            <span>Frequency</span>
+            <select id="medFrequency">
+              <option value="daily">Daily</option>
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+            </select>
+          </label>
+          <label class="field" id="weeklyDayField" hidden>
+            <span>Day of week</span>
+            <select id="medWeekday">
+              <option value="0">Sunday</option><option value="1">Monday</option>
+              <option value="2">Tuesday</option><option value="3">Wednesday</option>
+              <option value="4">Thursday</option><option value="5">Friday</option>
+              <option value="6">Saturday</option>
+            </select>
+          </label>
+          <label class="field" id="monthlyDayField" hidden>
+            <span>Day of month</span>
+            <input type="number" id="medMonthday" min="1" max="28" value="1">
+          </label>
+        </div>
+
+        <fieldset class="field">
+          <legend>Meal instruction</legend>
+          <div class="pill-choice">
+            <label><input type="radio" name="meal" value="before" checked> Before meal</label>
+            <label><input type="radio" name="meal" value="after"> After meal</label>
+            <label><input type="radio" name="meal" value="anytime"> Anytime</label>
+          </div>
+        </fieldset>
+
+        <label class="field">
+          <span>Notes (optional)</span>
+          <textarea id="medNotes" rows="2" placeholder="e.g. antibiotic — finish full course"></textarea>
+        </label>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="medSubmitBtn">Add medicine</button>
+          <button type="button" class="btn btn-ghost" id="medCancelBtn" hidden>Cancel edit</button>
+        </div>
+      </form>
+
+      <div class="list-card card">
+        <div class="list-toolbar">
+          <input type="search" id="medSearch" placeholder="Search medicines…" aria-label="Search medicines">
+          <div class="tabs" id="medFilterTabs" role="tablist" aria-label="Filter medicines">
+            <button class="tab active" data-filter="all" role="tab" aria-selected="true">All</button>
+            <button class="tab" data-filter="daily" role="tab" aria-selected="false">Daily</button>
+            <button class="tab" data-filter="weekly" role="tab" aria-selected="false">Weekly</button>
+            <button class="tab" data-filter="monthly" role="tab" aria-selected="false">Monthly</button>
+          </div>
+        </div>
+        <ul class="med-list" id="medList" aria-live="polite"></ul>
+        <div class="empty-state" id="medEmpty" hidden>
+          <svg viewBox="0 0 120 90" width="120"><ellipse cx="60" cy="78" rx="40" ry="6" fill="var(--mint-100)"/><rect x="30" y="20" width="60" height="44" rx="10" fill="var(--blue-400)" opacity=".25"/><rect x="45" y="34" width="30" height="10" rx="5" fill="var(--green-500)"/><rect x="45" y="48" width="30" height="6" rx="3" fill="var(--blue-600)" opacity=".5"/></svg>
+          <p>No medicines yet. Add one on the left to start your first reminder.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ AI + WATER ============ -->
+  <section id="wellbeing" class="section">
+    <div class="section-head">
+      <h2>A little extra care</h2>
+      <p>Gentle nudges to help your medicine work the way it should.</p>
+    </div>
+    <div class="wellbeing-grid">
+      <div class="card tip-card">
+        <div class="tip-head">
+          <span class="tip-badge">MediAlert Assistant</span>
+          <button class="icon-btn" id="nextTipBtn" title="Next tip">↻</button>
+        </div>
+        <p id="tipText">Drink a full glass of water after taking this medicine.</p>
+      </div>
+
+      <div class="card water-card">
+        <div class="water-head">
+          <h3>Water intake</h3>
+          <span id="waterCountLabel">0 / 8 cups</span>
+        </div>
+        <div class="water-body">
+          <svg viewBox="0 0 100 100" width="96" height="96" class="water-ring">
+            <circle cx="50" cy="50" r="42" class="ring-bg"/>
+            <circle cx="50" cy="50" r="42" class="ring-fill" id="waterRingFill"/>
+          </svg>
+          <button class="btn btn-primary" id="addWaterBtn">＋ 1 cup</button>
+        </div>
+        <p class="hint">A reminder chimes every hour to help you stay topped up.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ HISTORY ============ -->
+  <section id="history" class="section">
+    <div class="section-head">
+      <h2>Medication history</h2>
+      <p>Every dose, logged automatically.</p>
+    </div>
+    <div class="card table-card">
+      <div class="table-scroll">
+        <table>
+          <thead><tr><th>Date</th><th>Time</th><th>Medicine</th><th>Status</th></tr></thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="historyEmpty">
+        <p>No history yet — logged doses will appear here.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EMERGENCY ============ -->
+  <section id="emergency" class="section">
+    <div class="section-head">
+      <h2>Emergency &amp; medical info</h2>
+      <p>Kept close by, for when it matters most.</p>
+    </div>
+    <div class="emergency-grid">
+      <div class="card emergency-card">
+        <h3>Emergency contact</h3>
+        <label class="field"><span>Name</span><input type="text" id="ecName" placeholder="e.g. Anjali Sharma"></label>
+        <label class="field"><span>Phone number</span><input type="tel" id="ecPhone" placeholder="e.g. +91 98765 43210"></label>
+        <a href="#" class="btn btn-danger" id="quickCallBtn">📞 Quick call</a>
+        <p class="hint">Nearby hospital: <span id="hospitalPlaceholder">searching requires location access — placeholder</span></p>
+      </div>
+
+      <div class="card medinfo-card">
+        <h3>Medical information</h3>
+        <label class="field"><span>Blood group</span>
+          <select id="miBlood">
+            <option value="">Select</option>
+            <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+            <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+          </select>
+        </label>
+        <label class="field"><span>Allergies</span><input type="text" id="miAllergies" placeholder="e.g. Penicillin"></label>
+        <label class="field"><span>Existing conditions</span><input type="text" id="miConditions" placeholder="e.g. Hypertension"></label>
+        <button class="btn btn-primary" id="saveMedInfoBtn">Save medical info</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-inner">
+    <div class="brand footer-brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 40 40" width="26" height="26"><rect x="4" y="16" width="32" height="8" rx="4" fill="var(--blue-600)"/><rect x="4" y="16" width="14" height="8" rx="4" fill="var(--green-500)"/></svg>
+      </span>
+      <span class="brand-word">Medi<em>Alert</em></span>
+    </div>
+    <p>Built with care by <strong>Team Bit4Bit</strong> for the Prompt-to-Product Competition.</p>
+  </div>
+</footer>
+
+<!-- ============ REMINDER MODAL ============ -->
+<div id="reminderModal" class="modal" role="alertdialog" aria-modal="true" aria-labelledby="reminderTitle" hidden>
+  <div class="modal-card">
+    <span class="modal-pulse" aria-hidden="true"></span>
+    <h2 id="reminderTitle">Time for your medicine</h2>
+    <p id="reminderBody">It's time to take your medicine.</p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="markTakenBtn">✅ Mark as taken</button>
+      <button class="btn btn-ghost" id="snooze5Btn">Snooze 5 min</button>
+      <button class="btn btn-ghost" id="snooze10Btn">Snooze 10 min</button>
+      <button class="btn btn-text" id="skipBtn">Skip this dose</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ TOAST ============ -->
+<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="script.js"></script>
 </body>
 </html>
